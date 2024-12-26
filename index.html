@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico"/>
+    <title>Video Save Tool</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <div class="container">
+        <h1>My Video Save Tool</h1>
+        <form id="uploadForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="videoFile">Upload Video:</label>
+                    <input type="file" id="videoFile" accept="video/*">
+                </div>
+                <div class="form-group">
+                    <label for="videoURL">Or Paste Video URL:</label>
+                    <input type="url" id="videoURL" placeholder="https://example.com/video">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="videoSource">Video Source:</label>
+                    <select id="videoSource">
+                        <option value="youtube">YouTube</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="twitter">Twitter</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="videoType">Video Type:</label>
+                    <select id="videoType" required>
+                        <option value="education">Education</option>
+                        <option value="training">Training</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="category">Learning Category:</label>
+                    <input type="text" id="category" placeholder="e.g., Excel, HTML, Content Writing">
+                </div>
+            </div>
+
+            <label for="videoName">Video Name:</label>
+            <input type="text" id="videoName" required>
+            
+            <label for="description">Description:</label>
+            <textarea id="description" required></textarea>
+            
+            <button type="submit">Save Video</button>
+        </form>
+
+       
+         
+            <div class="search-bar" style="text-align: center;">
+            <input type="text" id="search" placeholder="Search by name, description, or type">
+            <i class="fa fa-search" aria-hidden="true"></i>
+        </div>
+
+        <div id="videoGallery">
+            <h2>Saved Videos</h2>
+            <div id="videoList"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const videoFile = document.getElementById('videoFile').files[0];
+            const videoURL = document.getElementById('videoURL').value;
+            const videoName = document.getElementById('videoName').value;
+            const description = document.getElementById('description').value;
+            const videoType = document.getElementById('videoType').value;
+            const category = document.getElementById('category').value;
+            const videoSource = document.getElementById('videoSource').value;
+            const videoContainer = document.createElement('div');
+            videoContainer.classList.add('video-item');
+
+            if (videoFile) {
+                const fileURL = URL.createObjectURL(videoFile);
+                videoContainer.innerHTML = `
+                    <video controls>
+                        <source src="${fileURL}" type="${videoFile.type}">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="action-buttons">
+                        <a href="${fileURL}" download="${videoName}" class="download-btn">Download</a>
+                        <button class="delete-btn">Delete</button>
+                    </div>
+                `;
+            } else if (videoURL) {
+                videoContainer.innerHTML = `
+                    <iframe src="${embedVideoURL(videoURL)}" frameborder="0" allowfullscreen></iframe>
+                    <div class="action-buttons">
+                        <a href="${videoURL}" target="_blank" class="download-btn">Download</a>
+                        <button class="delete-btn">Delete</button>
+                    </div>
+                `;
+            }
+
+            videoContainer.innerHTML += `
+                <h3>${videoName}</h3>
+                <p>${description}</p>
+                <p><strong>Type:</strong> ${videoType}</p>
+                <p><strong>Source:</strong> ${videoSource}</p>
+                <p><strong>Category:</strong> ${category}</p>
+                <hr>
+            `;
+
+            const videoList = document.getElementById('videoList');
+            videoList.appendChild(videoContainer);
+
+            document.getElementById('uploadForm').reset();
+
+            videoContainer.querySelector('.delete-btn').addEventListener('click', function() {
+                videoContainer.remove();
+            });
+        });
+
+        function embedVideoURL(url) {
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                const videoID = url.split('v=')[1] || url.split('/').pop();
+                return `https://www.youtube.com/embed/${videoID}`;
+            }
+            return url;
+        }
+
+        document.getElementById('search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const videos = document.querySelectorAll('.video-item');
+
+            videos.forEach(video => {
+                const text = video.innerText.toLowerCase();
+                video.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
